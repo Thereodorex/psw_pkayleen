@@ -182,16 +182,20 @@ int		operation_append(t_solution *solution, int operation)
 
 int		add_op(t_state *state, int oper)
 {
-	operation_append(&state->solution.operations, oper);
+
+	if (operation_append(&state->solution, oper))
+		return (1);
 	do_op(state, oper);
+	return (0);
 }
 
 void	find_solution(t_state *state)
 {
+	// print_stacks(state);
+	while (state->stack_a.length > 3)
+		add_op(state, PB);
+	// print_str("\n\n\n");
 	print_stacks(state);
-	// while (state->stack_a.length > 3)
-	// 	add_op(&state->solution, PB);
-	
 }
 
 void	print_solution(t_state *state)

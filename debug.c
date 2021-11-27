@@ -2,7 +2,7 @@
 
 static void	ft_putchar(char c)
 {
-	write(1, &c, 1);
+	write(0, &c, 1);
 }
 
 void	ft_putnbr(int n)
@@ -32,8 +32,8 @@ void print_stack(t_stack *stack)
 
 void print_stacks(t_state *state)
 {
-	print_str("A:");
+	print_str("A:\n");
 	print_stack(&state->stack_a);
-	print_str("B:");
+	print_str("B:\n");
 	print_stack(&state->stack_b);
 }
