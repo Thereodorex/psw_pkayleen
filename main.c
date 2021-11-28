@@ -26,8 +26,10 @@ int		init_state(t_state *state, int argc)
 	state->numbers_count = argc - 1;
 	state->stack_a.stack = ft_calloc(sizeof(int) * state->numbers_count);
 	state->stack_b.stack = ft_calloc(sizeof(int) * state->numbers_count);
+	state->stack_a.length = state->numbers_count;
 	state->solution.operations = ft_calloc(sizeof(int) * 100);	// динамический массив
 	state->solution.size = 100;
+	state->solution.length = 0;
 
 	if (!state->stack_a.stack || !state->stack_b.stack || !state->solution.operations)
 	{
@@ -182,16 +184,110 @@ int		operation_append(t_solution *solution, int operation)
 
 int		add_op(t_state *state, int oper)
 {
-	operation_append(&state->solution.operations, oper);
+	if (operation_append(&state->solution, oper))
+		return (1);
 	do_op(state, oper);
+	operation_print();
+	return (0);
+}
+
+
+void	sort_a(t_state	*state)
+{
+	t_stack		*stack;
+
+	stack = &state->stack_a;
+	// 1 2 3 или 2 3 1 или 3 1 2 ок
+
+	// 1 3 2
+	if (stack->stack[2] > stack->stack[0] && stack->stack[2] < stack->stack[1])
+		add_op(state, SA);
+	// 2 1 3
+	if (stack->stack[0] > stack->stack[1] && stack->stack[0] < stack->stack[2])
+		add_op(state, SA);
+	// 3 2 1
+	if (stack->stack[1] < stack->stack[0] && stack->stack[1] > stack->stack[2])
+		add_op(state, SA);
+}
+
+void	search_min_comb(t_state *state)
+{
+	int	i;
+	int	j;
+	int	idx_num_a;
+	int	num_a;	// пара чисел из топа стэков a и b, для которой есть подходщая комбинация
+	int	num_b;
+
+	int	flag; // 1 - комбинация подходит, 0 - не подходит
+	i = -1;
+
+	num_a = state->stack_a.stack[0];
+	num_b = state->stack_b.stack[0];
+	min_comb = state->stack_b.length;
+	while (++i < state->stack_a.length)
+	{
+		j = -1;
+		while (++j < state->stack_b.length)
+		{
+			if (state->stack_a.stack[0] >= state->stack_a.stack[state->stack_a.length - 1])
+			{
+				if ((state->stack_b.stack[0] > state->stack_a.stack[state->stack_a.length - 1])
+					&& (state->stack_b.stack[0] < state->stack_a.stack[0]))
+					flag = 1;
+				else flag = 0;
+			}
+			else
+			{
+				if ((state->stack_b.stack[0] > state->stack_a.stack[state->stack_a.length - 1])
+					|| (state->stack_b.stack[0] < state->stack_a.stack[0]))
+					flag = 1;
+				else flag = 0;
+			}
+			if (flag)
+			{
+				if (j < min_comb)
+				{
+					if (j <= state->stack_b.length / 2)
+					min_comb = j;
+					idx_num_a = i;
+				}
+			}
+			// else
+			// 	add_op(state, RB);
+		}
+	}
 }
 
 void	find_solution(t_state *state)
 {
+	int	min_comb;	// мин число вращений
+
 	print_stacks(state);
-	// while (state->stack_a.length > 3)
-	// 	add_op(&state->solution, PB);
-	
+	while (state->stack_a.length > 3)
+		add_op(state, PB);
+	print_stacks(state);
+
+// сортировка 3ех элементов из стэка a
+	sort_a(state);
+	print_stacks(state);
+
+// поиск мин. числа вращений с сохранением пары чисел
+	min_comb = search_min_comb(state);
+
+	if (min_comb <= state->stack_b.length / 2)
+		while (min_comb != 0)
+		{
+			add_op(state, RB);
+			min_comb--;
+		}
+	else
+	{
+		while (min_comb != state->stack_b.length)
+		{
+			add_op(state, RRB);
+			min_comb++;
+		}
+	}
 }
 
 void	print_solution(t_state *state)

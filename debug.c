@@ -36,4 +36,9 @@ void print_stacks(t_state *state)
 	print_stack(&state->stack_a);
 	print_str("B:");
 	print_stack(&state->stack_b);
+	print_str("len_A: ");
+	printf("%d\n", state->stack_a.length);
+	print_str("len_B: ");
+	printf("%d\n", state->stack_b.length);
+	print_str("\n");
 }
