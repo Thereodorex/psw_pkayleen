@@ -19,11 +19,19 @@ int		check_args(int argc, char **argv)
 	return (0);
 }
 
-int		init_state(t_state *state, int argc)
+int		init_state(t_state *state, int argc, char **argv)
 {
 	// Единственная функция с маллоком, кроме добавления новых операций в решение и самого state
 	// Может возникнуть ошибка маллока
-	state->numbers_count = argc - 1;
+	char	*argv_copy;
+
+	argv_copy = ft_strdup(argv[1]);
+	state->numbers_count = countwords(argv_copy , ' ');
+	// printf("%d\n", state->numbers_count);
+	// printf("%s\n", argv_copy );
+	state->numbers = ft_strsplit(argv_copy, ' ');
+	// for (int i = 0; i < state->numbers_count; i++)
+	// 	printf("%s\n", state->numbers[i]);
 	state->stack_a.stack = ft_calloc(sizeof(int) * state->numbers_count);
 	state->stack_b.stack = ft_calloc(sizeof(int) * state->numbers_count);
 	state->solution.operations = ft_calloc(sizeof(int) * 100);	// динамический массив
@@ -39,124 +47,28 @@ int		init_state(t_state *state, int argc)
 	return (0);
 }
 
-void	parse_args(t_state *state, char **argv)
+void	parse_args(t_state *state)
 {
 	int		i;
+	int		words_count;
+	char	**splited;
 
 	i = 0;
 	while(i < state->numbers_count)
 	{
-		state->stack_a.stack[i] = ft_atoi(argv[i + 1]);
-		ft_putnbr(state->stack_a.stack[i]);
-		print_str("\n");
+		state->stack_a.stack[i] = ft_atoi(state->numbers[i]);
+		state->stack_a.length++;
+		// ft_putnbr(state->stack_a.stack[i]);
+		// print_str("\n");
 		i++;
 	}
+	del(state->numbers, state->numbers_count);
 }
 
 int		check_duplicates(t_state *state)
 {
 	// Возвращает 0 - ок, 1 - есть дубликаты
 	return (0);
-}
-
-void	swap_stack(int *arr)
-{
-	int	tmp;
-
-	tmp = arr[0];
-	arr[0] = arr[1];
-	arr[1] = tmp;
-}
-
-void	push_stack(t_stack *stack1, t_stack *stack2)
-{
-	int num;
-	int	i;
-
-	num = stack2->stack[0];
-	stack2->length--;
-	i = -1;
-	while (++i < stack2->length)
-		stack2->stack[i] = stack2->stack[i + 1];
-	i = stack1->length + 1;
-	while (--i > 0)
-		stack1->stack[i] = stack1->stack[i - 1];
-	stack1->stack[0] = num;
-	stack1->length++;
-}
-
-void	rotate_stack(t_stack *stack)
-{
-	int num;
-	int	i;
-
-	num = stack->stack[0];
-	i = -1;
-	while (++i < stack->length)
-		stack->stack[i] = stack->stack[i + 1];
-	stack->stack[i - 1] = num;
-}
-
-void	rotate_stack_back(t_stack *stack)
-{
-	int	num;
-	int	i;
-
-	num = stack->stack[stack->length - 1];
-	i = stack->length + 1;
-	while (--i)
-		stack->stack[i] = stack->stack[i - 1];
-	stack->stack[0] = num;
-}
-
-
-void	do_op(t_state *state, int oper)
-{
-	int		tmp;
-
-	if (oper == SA)
-		swap_stack(state->stack_a.stack);
-	else if (oper == SB)
-		swap_stack(state->stack_b.stack);	
-	else if (oper == SS)
-	{
-		swap_stack(state->stack_a.stack);
-		swap_stack(state->stack_b.stack);
-	}
-	else if (oper == PA)
-	{
-		push_stack(&state->stack_a, &state->stack_b);
-	}
-	else if (oper == PB)
-	{
-		push_stack(&state->stack_b, &state->stack_a);
-	}
-	else if (oper == RA)
-	{
-		rotate_stack(&state->stack_a);
-	}
-	else if (oper == RB)
-	{
-		rotate_stack(&state->stack_b);
-	}
-	else if (oper == RR)
-	{
-		rotate_stack(&state->stack_a);
-		rotate_stack(&state->stack_b);
-	}
-	else if (oper == RRA)
-	{
-		rotate_stack_back(&state->stack_a);
-	}
-	else if (oper == RRB)
-	{
-		rotate_stack_back(&state->stack_b);
-	}
-	else if (oper == RRR)
-	{
-		rotate_stack_back(&state->stack_a);
-		rotate_stack_back(&state->stack_b);
-	}
 }
 
 int		operation_append(t_solution *solution, int operation)
@@ -189,18 +101,100 @@ int		add_op(t_state *state, int oper)
 	return (0);
 }
 
+void	sort_three(t_state *state)
+{
+	t_stack		*stack;
+
+	stack = &state->stack_a;
+	// 1 2 3 или 2 3 1 или 3 1 2 ок
+
+	// 1 3 2
+	if (stack->stack[2] > stack->stack[0] && stack->stack[2] < stack->stack[1])
+		add_op(state, SA);
+	// 2 1 3
+	if (stack->stack[0] > stack->stack[1] && stack->stack[0] < stack->stack[2])
+		add_op(state, SA);
+	// 3 2 1
+	if (stack->stack[1] < stack->stack[0] && stack->stack[1] > stack->stack[2])
+		add_op(state, SA);
+}
+
+int		find_min_index(t_state *state)
+{
+	int		i;
+	int		min;
+	int		min_index;
+
+	min = 0;
+	min_index = 0;
+	i = 0;
+	if (state->stack_a.length)
+		min = state->stack_a.stack[0];
+	while (++i < state->stack_a.length)
+	{
+		if (state->stack_a.stack[i] < min)
+		{
+			min = state->stack_a.stack[i];
+			min_index = i;
+		}
+	}
+	return (min_index);
+}
+
 void	find_solution(t_state *state)
 {
+	int		min_index;
 	// print_stacks(state);
 	while (state->stack_a.length > 3)
 		add_op(state, PB);
-	// print_str("\n\n\n");
+	sort_three(state);
+	print_stacks(state);
+	while (state->stack_b.length)
+	{
+		main_algo(state);
+		print_stacks(state);
+	}
+	min_index = find_min_index(state);
+	if (min_index < (state->stack_a.length - min_index))
+		while (min_index--)
+			add_op(state, RA);
+	else
+		while (min_index++ != state->stack_a.length)
+			add_op(state, RRA);
+	// print_str("\n");
 	print_stacks(state);
 }
 
 void	print_solution(t_state *state)
 {
+	int		i;
 
+	i = -1;
+	while (++i < state->solution.length)
+	{
+		if (state->solution.operations[i] == 0)
+			print_str("sa\n");
+		else if (state->solution.operations[i] == 1)
+			print_str("sb\n");
+		else if (state->solution.operations[i] == 2)
+			print_str("ss\n");
+		else if (state->solution.operations[i] == 3)
+			print_str("pa\n");
+		else if (state->solution.operations[i] == 4)
+			print_str("pb\n");
+		else if (state->solution.operations[i] == 5)
+			print_str("ra\n");
+		else if (state->solution.operations[i] == 6)
+			print_str("rb\n");
+		else if (state->solution.operations[i] == 7)
+			print_str("rr\n");
+		else if (state->solution.operations[i] == 8)
+			print_str("rra\n");
+		else if (state->solution.operations[i] == 9)
+			print_str("rrb\n");
+		else if (state->solution.operations[i] == 10)
+			print_str("rrr\n");
+	}
 }
 
 void	free_state(t_state *state)
@@ -218,12 +212,11 @@ int		main(int argc, char **argv) {
 	state = ft_calloc(sizeof(t_state));
 	if (check_args(argc, argv))
 		return (error_func());
-	if (init_state(state, argc))
+	if (init_state(state, argc, argv))
 		return (error_func());
-	parse_args(state, argv);
+	parse_args(state);
 	if (check_duplicates(state))
 		return (error_func());
-	
 	find_solution(state);
 	print_solution(state);
 	free_state(state);

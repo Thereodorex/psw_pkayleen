@@ -32,8 +32,8 @@ void print_stack(t_stack *stack)
 
 void print_stacks(t_state *state)
 {
-	print_str("A:\n");
+	print_str("A:");
 	print_stack(&state->stack_a);
-	print_str("B:\n");
+	print_str("B:");
 	print_stack(&state->stack_b);
 }

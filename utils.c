@@ -12,7 +12,7 @@ size_t  str_len(char *str)
 
 void    print_str(char *str)
 {
-    write(0, str, str_len(str));
+    write(1, str, str_len(str));
 }
 
 int     error_func()
