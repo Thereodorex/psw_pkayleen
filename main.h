@@ -35,6 +35,7 @@ typedef struct	s_solution
 
 typedef struct	s_state
 {
+	int			flag;
 	int			numbers_count;
 	char		**numbers;
 	t_stack		stack_a;

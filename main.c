@@ -34,8 +34,8 @@ int		init_state(t_state *state, int argc, char **argv)
 	// 	printf("%s\n", state->numbers[i]);
 	state->stack_a.stack = ft_calloc(sizeof(int) * state->numbers_count);
 	state->stack_b.stack = ft_calloc(sizeof(int) * state->numbers_count);
-	state->solution.operations = ft_calloc(sizeof(int) * 100);	// динамический массив
-	state->solution.size = 100;
+	state->solution.operations = ft_calloc(sizeof(int) * 10);	// динамический массив
+	state->solution.size = 10;
 
 	if (!state->stack_a.stack || !state->stack_b.stack || !state->solution.operations)
 	{
@@ -52,6 +52,7 @@ void	parse_args(t_state *state)
 	int		i;
 	int		words_count;
 	char	**splited;
+
 
 	i = 0;
 	while(i < state->numbers_count)
@@ -148,11 +149,11 @@ void	find_solution(t_state *state)
 	while (state->stack_a.length > 3)
 		add_op(state, PB);
 	sort_three(state);
-	print_stacks(state);
+	// print_stacks(state);
 	while (state->stack_b.length)
 	{
 		main_algo(state);
-		print_stacks(state);
+		// print_stacks(state);
 	}
 	min_index = find_min_index(state);
 	if (min_index < (state->stack_a.length - min_index))
@@ -162,7 +163,7 @@ void	find_solution(t_state *state)
 		while (min_index++ != state->stack_a.length)
 			add_op(state, RRA);
 	// print_str("\n");
-	print_stacks(state);
+	// print_stacks(state);
 }
 
 void	print_solution(t_state *state)

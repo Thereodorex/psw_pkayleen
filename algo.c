@@ -39,7 +39,7 @@ static void		execute_step(t_state *state, int a_index, int b_index)
 				add_op(state, RRR);
 			else if (i >= a_index)
 				add_op(state, RRA);
-			else if (i >= b_index)
+			else if (j >= b_index)
 				add_op(state, RRB);
 			i--;
 			j--;
@@ -109,16 +109,22 @@ int		is_pair_ok(t_state *state, int a_index, int b_index)
 	current_a_number = state->stack_a.stack[a_index];
 	b_number = state->stack_b.stack[b_index];
 	// Надо проверить что это корректная логика для обычных случаев
-	if (current_a_number < next_a_number && current_a_number > prev_a_number)
+	// printf("%d b_number\n", b_number);
+	// printf("%d current number\n", current_a_number);
+	if (current_a_number > prev_a_number)
 	{
-		printf("%d\n", state->stack_a.stack[a_index]);
-		printf("%d\n", state->stack_b.stack[b_index]);
 		if (b_number < current_a_number && b_number > prev_a_number)
+		{
+			// printf("ok default\n");
 			return (1);
+		}
 	}
 	// Надо проверить что это корректная логика для крайних случаев
 	else if (b_number < current_a_number || b_number > prev_a_number)
+	{
+		// printf("ok special\n");
 		return (1);
+	}
 	return (0);
 }
 
@@ -148,5 +154,24 @@ void			main_algo(t_state *state)
 			}
 		}
 	}
+	// printf("%d a_index\n", shortest_index_a);
+	// printf("%d b_index\n", shortest_index_b);
 	execute_step(state, shortest_index_a, shortest_index_b);
+	// i = 0;
+	// j = 0;
+	// while (++i < state->stack_a.length)
+	// {
+	// 	if (state->stack_a.stack[i] < state->stack_a.stack[i - 1])
+	// 		j++;
+	// }
+	// if (state->stack_a.stack[0] < state->stack_a.stack[state->stack_a.length - 1])
+	// 	j++;
+	// if (j > 1 && !state->flag)
+	// {
+	// 	state->flag = 1;
+	// 	// print_str(state->solution.operations[state->solution.length - 2]);
+	// 	// print_str("\n");
+	// 	print_solution(state);
+	// 	print_stacks(state);
+	// }
 }
